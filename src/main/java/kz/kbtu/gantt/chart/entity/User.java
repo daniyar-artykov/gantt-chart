@@ -27,7 +27,8 @@ public class User implements Serializable {
 	private String role;
 	private String firstName;
 	private String secondName;
-	private List<Task> tasks = new ArrayList<Task>();
+	private List<Task> createdTasks = new ArrayList<Task>();
+	private List<Task> responsibleTasks = new ArrayList<Task>();
 
 	@Id
 	@Column(name = "id")
@@ -66,13 +67,23 @@ public class User implements Serializable {
 		this.secondName = secondName;
 	}
 
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="user", orphanRemoval=true,
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="creator", orphanRemoval=true,
 			cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-	public List<Task> getTasks() {
-		return tasks;
+	public List<Task> getCreatedTasks() {
+		return createdTasks;
 	}
 
-	public void setTasks(List<Task> tasks) {
-		this.tasks = tasks;
+	public void setCreatedTasks(List<Task> createdTasks) {
+		this.createdTasks = createdTasks;
+	}
+
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="responsible", orphanRemoval=true,
+			cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+	public List<Task> getResponsibleTasks() {
+		return responsibleTasks;
+	}
+
+	public void setResponsibleTasks(List<Task> responsibleTasks) {
+		this.responsibleTasks = responsibleTasks;
 	}
 }

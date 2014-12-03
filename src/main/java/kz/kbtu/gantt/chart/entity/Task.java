@@ -33,10 +33,12 @@ public class Task implements Serializable {
 	private Date startDate;
 	private Integer duration;
 	private String taskDescription;
-	private User user;
+	private User creator;
+	private User responsible;
 	private Task parent;
 	private List<Task> childs = new ArrayList<Task>();
 	private Task sequence;
+	private Integer progress;
 
 	@Id
 	@Column(name = "id")
@@ -77,13 +79,23 @@ public class Task implements Serializable {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	public User getUser() {
-		return user;
+	@JoinColumn(name = "creator_id")
+	public User getCreator() {
+		return creator;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setCreator(User creator) {
+		this.creator = creator;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "responsible_id")
+	public User getResponsible() {
+		return responsible;
+	}
+
+	public void setResponsible(User responsible) {
+		this.responsible = responsible;
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -117,5 +129,11 @@ public class Task implements Serializable {
 		this.childs = childs;
 	}
 
+	public Integer getProgress() {
+		return progress;
+	}
 
+	public void setProgress(Integer progress) {
+		this.progress = progress;
+	}
 }

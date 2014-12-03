@@ -38,9 +38,9 @@ public class EntityTest {
 		t.setDuration(4);
 		t.setStartDate(new Date());
 		t.setTaskDescription("test");
-		t.setUser(u);
+		t.setCreator(u);
 
-		u.getTasks().add(t);
+		u.getCreatedTasks().add(t);
 
 		em.persist(u);
 
@@ -62,7 +62,7 @@ public class EntityTest {
 		t1.setDuration(1);
 		t1.setStartDate(new Date());
 		t1.setTaskDescription("test 1");
-		t1.setUser(t.getUser());
+		t1.setCreator(t.getCreator());
 		t1.setParent(t);
 
 		em.persist(t1);
@@ -73,7 +73,7 @@ public class EntityTest {
 		t2.setDuration(3);
 		t2.setStartDate(new Date());
 		t2.setTaskDescription("test 2");
-		t2.setUser(t.getUser());
+		t2.setCreator(t.getCreator());
 		t2.setParent(t);
 		t2.setSequence(t1);
 
