@@ -38,7 +38,7 @@ public class Task implements Serializable {
 	private Task parent;
 	private List<Task> childs = new ArrayList<Task>();
 	private Task sequence;
-	private Integer progress;
+	private Double progress;
 
 	@Id
 	@Column(name = "id")
@@ -129,11 +129,11 @@ public class Task implements Serializable {
 		this.childs = childs;
 	}
 
-	public Integer getProgress() {
+	public Double getProgress() {
 		return progress;
 	}
 
-	public void setProgress(Integer progress) {
+	public void setProgress(Double progress) {
 		this.progress = progress;
 	}
 }

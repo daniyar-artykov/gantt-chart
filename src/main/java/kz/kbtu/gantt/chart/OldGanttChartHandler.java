@@ -8,13 +8,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -55,13 +52,13 @@ import com.jidesoft.scale.DateScaleModel;
 import com.jidesoft.scale.ResizePeriodsPopupMenuCustomizer;
 import com.jidesoft.scale.VisiblePeriodsPopupMenuCustomizer;
 
-public class GanttChartHandler {
+public class OldGanttChartHandler {
 
 	private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("ganttPU");
 	private static final String roles[] = { "ProjectManager", "Developer", "Designer"};
 	private static final String columnNames[] = {"ID", "First name", "Second name", "Role"};
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
-
+	
 	private static JFrame newFrame;
 	private static EntityManager em;
 	private static User currentUser;
@@ -69,13 +66,12 @@ public class GanttChartHandler {
 	private static List<Task> tasksList;
 	private static JFrame mainFrame;
 	private static JPanel usersTab;
-	private static JPanel ganttTab;
-	private static Component ganttPanel;
 	private static JScrollPane scrollPane;
-
+	
 	private static GanttChartPane<Date, DefaultGanttEntry<Date>> _ganttChartPane;
 	private static GanttChart<Date, DefaultGanttEntry<Date>> _ganttChart;
-
+	private static boolean _debug = false;
+	
 	public static void main(String [] args) {
 		em = emf.createEntityManager();
 		currentUser = em.find(User.class, (long) 1);
@@ -84,15 +80,15 @@ public class GanttChartHandler {
 		mainFrame = new JFrame("Gantt chart");
 		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
-
+		
 		JLabel currentUserLabel = new JLabel(currentUser.getFirstName() + " " + currentUser.getSecondName() + " [" + currentUser.getRole() + "]");	
 		content.add(currentUserLabel, BorderLayout.NORTH);
-
-		ganttTab = new JPanel();
-
+		
+		JPanel ganttTab = new JPanel();
+		
 		JButton addTaskBtn = new JButton("Add task");
 		addTaskBtn.addActionListener(new ActionListener() {
 			@Override
@@ -103,7 +99,7 @@ public class GanttChartHandler {
 		ganttTab.add(addTaskBtn);
 
 		usersTab = new JPanel();
-
+		
 		JButton addPersonBtn = new JButton("Add person");
 		addPersonBtn.addActionListener(new ActionListener() {
 			@Override
@@ -112,22 +108,21 @@ public class GanttChartHandler {
 			}
 		});
 		usersTab.add(addPersonBtn);
-
+		
 		JTable table = new JTable(getAllUsers(), columnNames);
-
-		scrollPane = new JScrollPane(table);
+		
+	    scrollPane = new JScrollPane(table);
 		usersTab.add(scrollPane);
-
+	    
 		JTabbedPane mainTabPane = new JTabbedPane();
-
+		
 		mainTabPane.add("Gantt chart", ganttTab);
-		ganttPanel = getDemoPanel();
-		ganttTab.add(ganttPanel);
+		ganttTab.add(getDemoPanel());
 		mainTabPane.add("Resources", usersTab);
 		content.add(mainTabPane, BorderLayout.CENTER);
-
+		
 		mainFrame.add(content);
-
+		
 		mainFrame.setVisible(true);
 	}
 
@@ -144,7 +139,7 @@ public class GanttChartHandler {
 
 		return usersName;
 	}
-
+	
 	private static Object[][] getAllUsers() {
 		Object [][] allUsers = new Object[usersList.size()][4];
 		for(int i = 0; i < usersList.size(); i++) {
@@ -153,61 +148,61 @@ public class GanttChartHandler {
 			allUsers[i][2] = usersList.get(i).getSecondName();
 			allUsers[i][3] = usersList.get(i).getRole();
 		}
-
+		
 		return allUsers;
 	}
 
 	private static void openNewTaskWindow() {
 		loadUsers();
-
+		
 		newFrame = new JFrame("Add task");
 		newFrame.setSize(500, 350);
 		newFrame.setVisible(true);
-
+		
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridLayout(0, 2));
-
+		
 		JLabel descLabel = new JLabel("Description");
 		panel.add(descLabel);
-		final JTextField taskDesc  = new JTextField();
+		JTextField taskDesc  = new JTextField();
 		panel.add(taskDesc);
-
+		
 		JLabel startLabel = new JLabel("Start date");
 		panel.add(startLabel);
-		final JTextField startDate  = new JTextField();
+		JTextField startDate  = new JTextField();
 		panel.add(startDate);
-
+		
 		JLabel durationLabel = new JLabel("Duration");
 		panel.add(durationLabel);
-		final JTextField duration = new JTextField();
+		JTextField duration  = new JTextField();
 		panel.add(duration);
-
+		
 		JLabel dueLabel = new JLabel("Due date");
 		panel.add(dueLabel);
-		final JTextField dueDate  = new JTextField();
+		JTextField dueDate  = new JTextField();
 		panel.add(dueDate);
 		dueDate.setEditable(false);
 
 		JLabel progressLabel = new JLabel("Progress");
 		panel.add(progressLabel);
-		final JTextField progress  = new JTextField();
+		JTextField progress  = new JTextField();
 		panel.add(progress);
-
+		
 		JLabel personLabel = new JLabel("Assigned person");
 		panel.add(personLabel);
-		final JComboBox<String> comboBox = new JComboBox<String>(getAllUsersName());
+		JComboBox<String> comboBox = new JComboBox<String>(getAllUsersName());
 		comboBox.setEditable(true);
 		panel.add(comboBox);
-
+		
 		JLabel mainTaskLabel = new JLabel("Main task");
 		panel.add(mainTaskLabel);
-		final JComboBox<String> mainTask = new JComboBox<String>(getAllTasks());
+		JComboBox<String> mainTask = new JComboBox<String>(getAllTasks());
 		mainTask.setEditable(true);
 		panel.add(mainTask);
-
+		
 		JLabel perviousTaskLabel = new JLabel("Pervious task");
 		panel.add(perviousTaskLabel);
-		final JComboBox<String> perviousTask = new JComboBox<String>(getAllTasks());
+		JComboBox<String> perviousTask = new JComboBox<String>(getAllTasks());
 		perviousTask.setEditable(true);
 		panel.add(perviousTask);
 
@@ -215,35 +210,10 @@ public class GanttChartHandler {
 		saveBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Task t = new Task();
-				t.setCreator(currentUser);
-				t.setDuration(Integer.parseInt(duration.getText()));
-				t.setParent(getTaskById(new Long(mainTask.getSelectedIndex())));
-				t.setProgress(Double.parseDouble(progress.getText()));
-				//				t.setResponsible(responsible);
-				t.setSequence(getTaskById(new Long(perviousTask.getSelectedIndex())));
-				try {
-					t.setStartDate(DATE_FORMAT.parse(startDate.getText()));
-				} catch (ParseException e1) {
-					e1.printStackTrace();
-				}
-				t.setTaskDescription(taskDesc.getText());
-
-				em.getTransaction().begin();
-				em.persist(t);
-				em.getTransaction().commit();
-				
 				newFrame.setVisible(false);
-
-				ganttTab.remove(ganttPanel);
-				ganttPanel = getDemoPanel();
-				ganttTab.add(ganttPanel);
-
-				ganttTab.validate();
-				ganttTab.repaint();
 			}
 		});
-
+		
 		panel.add(saveBtn);
 		JButton closeBtn = new JButton("Close");
 		closeBtn.addActionListener(new ActionListener() {
@@ -252,11 +222,11 @@ public class GanttChartHandler {
 				newFrame.setVisible(false);
 			}
 		});
-
+		
 		panel.add(closeBtn);
 		newFrame.add(panel);
 	}
-
+	
 	private static void loadTasks() {
 		tasksList = em.createQuery( "from Task t", Task.class ).getResultList();
 	}
@@ -307,7 +277,7 @@ public class GanttChartHandler {
 				loadUsers();
 				usersTab.remove(scrollPane);
 				JTable table = new JTable(getAllUsers(), columnNames);
-
+				
 				scrollPane = new JScrollPane(table);
 				usersTab.add(scrollPane);
 				usersTab.validate();
@@ -325,7 +295,7 @@ public class GanttChartHandler {
 		panel.add(closeBtn);
 		newFrame.add(panel);
 	}
-
+	
 	public static Component getDemoPanel() {
 		CellRendererManager.initDefaultRenderer();
 		CellEditorManager.initDefaultEditor();
@@ -358,61 +328,102 @@ public class GanttChartHandler {
 
 		model.setScaleModel(scaleModel);
 
+		Calendar monthBefore = Calendar.getInstance();
+		monthBefore.add(Calendar.MONTH, -1);
+		Calendar monthBefore3 = (Calendar) monthBefore.clone();
+		monthBefore3.add(Calendar.DAY_OF_WEEK, 3);
+		Calendar monthBefore8 = (Calendar) monthBefore3.clone();
+		monthBefore8.add(Calendar.DAY_OF_WEEK, 5);
+		Calendar monthBefore13 = (Calendar) monthBefore8.clone();
+		monthBefore13.add(Calendar.DAY_OF_WEEK, 5);
+		Calendar monthBefore20 = (Calendar) monthBefore13.clone();
+		monthBefore20.add(Calendar.DAY_OF_WEEK, 7);
+		Calendar monthBefore15 = (Calendar) monthBefore13.clone();
+		monthBefore15.add(Calendar.DAY_OF_WEEK, 2);
+		Calendar monthBefore27 = (Calendar) monthBefore13.clone();
+		monthBefore27.add(Calendar.DAY_OF_WEEK, 14);
+		Calendar monthBefore29 = (Calendar) monthBefore27.clone();
+		monthBefore29.add(Calendar.DAY_OF_WEEK, 2);
+		Calendar monthBefore30 = (Calendar) monthBefore27.clone();
+		monthBefore30.add(Calendar.DAY_OF_WEEK, 3);
+		
+		Calendar today = Calendar.getInstance();
 		Calendar dayBefore2 = Calendar.getInstance();
 		dayBefore2.add(Calendar.DAY_OF_WEEK, -2);
 		Calendar dayAfter7 = Calendar.getInstance();
 		dayAfter7.add(Calendar.DAY_OF_WEEK, 7);
+		Calendar dayAfter5 = Calendar.getInstance();
+		dayAfter5.add(Calendar.DAY_OF_WEEK, 5);
+		Calendar dayAfter2 = Calendar.getInstance();
+		dayAfter2.add(Calendar.DAY_OF_WEEK, 2);
+		Calendar dayAfter12 = Calendar.getInstance();
+		dayAfter12.add(Calendar.DAY_OF_WEEK, 12);
 
+		
 		model.setRange(new TimeRange(dayBefore2.getTime(), dayAfter7.getTime()));
-
-		List<Task> tasks = em.createQuery("from Task t").getResultList();
-
-		Map<Long, DefaultGanttEntry<Date>> sequenceMap = new HashMap<Long, DefaultGanttEntry<Date>>();
-
-		for(Task task:tasks) {
-			if(task.getParent() == null) {
-				Calendar dueDate = Calendar.getInstance();
-				dueDate.setTime(task.getStartDate());
-				dueDate.add(Calendar.DAY_OF_WEEK, task.getDuration());
-				DefaultGanttEntry<Date> group1 = new DefaultGanttEntry<Date>(task.getTaskDescription(), Date.class, 
-						new TimeRange(task.getStartDate(), dueDate.getTime()), task.getProgress()/100);
-				group1.setExpanded(true);
-
-				if(!task.getChilds().isEmpty()) {
-					for(Task child : task.getChilds()) {
-						dueDate.setTime(child.getStartDate());
-						dueDate.add(Calendar.DAY_OF_WEEK, child.getDuration());
-						DefaultGanttEntry<Date> childGroup = new DefaultGanttEntry<Date>(child.getTaskDescription(), Date.class, 
-								new TimeRange(child.getStartDate(), dueDate.getTime()), child.getProgress()/100);
-						group1.addChild(childGroup);
-						sequenceMap.put(child.getId(), childGroup);
-						if(child.getSequence() != null) {
-							if(sequenceMap.containsKey(child.getSequence().getId())) {
-								model.getGanttEntryRelationModel().addEntryRelation(
-										new DefaultGanttEntryRelation<DefaultGanttEntry<Date>>(
-												sequenceMap.get(child.getSequence().getId()), 
-												childGroup, GanttEntryRelation.ENTRY_RELATION_FINISH_TO_START));
-								sequenceMap.remove(child.getSequence().getId());
-							} else {
-								sequenceMap.put(child.getId(), childGroup);
-							}
-						}
-					}
-				}
-
-				model.addGanttEntry(group1);
-			}
-		}
+		DefaultGanttEntry<Date> group1 = new DefaultGanttEntry<Date>("Software concept", Date.class, new TimeRange(monthBefore.getTime(), monthBefore3.getTime()), 1);
+		group1.setExpanded(true);
+		DefaultGanttEntry<Date> group2 = new DefaultGanttEntry<Date>("Requirements analysis", Date.class, new TimeRange(monthBefore3.getTime(), monthBefore8.getTime()), 1);
+		group2.setExpanded(true);
+		DefaultGanttEntry<Date> group3 = new DefaultGanttEntry<Date>("Architectural design", Date.class, new TimeRange(monthBefore8.getTime(), monthBefore13.getTime()), 1);
+		group3.setExpanded(true);
+		DefaultGanttEntry<Date> group4 = new DefaultGanttEntry<Date>("Coding and debugging", Date.class, new TimeRange(monthBefore13.getTime(), monthBefore27.getTime()), 0.8);
+		group4.setExpanded(true);
+		DefaultGanttEntry<Date> group5 = new DefaultGanttEntry<Date>("System testing", Date.class, new TimeRange(monthBefore27.getTime(), monthBefore30.getTime()), 0);
+		group5.setExpanded(true);
+		
+		DefaultGanttEntry<Date> child4_1 = new DefaultGanttEntry<Date>("Database architecture", Date.class, new TimeRange(monthBefore13.getTime(), monthBefore20.getTime()), 1);
+		DefaultGanttEntry<Date> child4_2 = new DefaultGanttEntry<Date>("UI and main logic", Date.class, new TimeRange(monthBefore20.getTime(), monthBefore27.getTime()), 0.6);
+		group4.addChild(child4_1);
+		group4.addChild(child4_2);
+		
+		model.getGanttEntryRelationModel().addEntryRelation(new DefaultGanttEntryRelation<DefaultGanttEntry<Date>>(child4_1, child4_2, GanttEntryRelation.ENTRY_RELATION_FINISH_TO_START));
+		
+//		DefaultGanttEntry<Date> subgroup = new DefaultGanttEntry<Date>("Sub group",
+//				Date.class, new TimeRange(today.getTime(), dayAfter5.getTime()), 0);
+//		subgroup.setExpanded(true);
+//
+//		for (int relation : new int[]{
+//				GanttEntryRelation.ENTRY_RELATION_FINISH_TO_START,
+//				GanttEntryRelation.ENTRY_RELATION_START_TO_FINISH,
+//				GanttEntryRelation.ENTRY_RELATION_FINISH_TO_FINISH,
+//				GanttEntryRelation.ENTRY_RELATION_START_TO_START}) {
+//
+//			DefaultGanttEntry<Date> child1 = new DefaultGanttEntry<Date>("Task 1." + relation,
+//					Date.class, new TimeRange(today.getTime(), dayAfter2.getTime()), 0.4);
+//			DefaultGanttEntry<Date> child2 = new DefaultGanttEntry<Date>("Task 2." + relation,
+//					Date.class, new TimeRange(dayAfter2.getTime(), dayAfter5.getTime()), 0);
+//
+//			group1.addChild(child1);
+//			if (_debug) {
+//				group2.addChild(new DefaultGanttEntry<Date>("Task 2." + relation + "spacer",
+//						new TimeRange(today.getTime(), today.getTime())));
+//			}
+//			group2.addChild(child2);
+//
+//			if (_debug) {
+//				child1 = new DefaultGanttEntry<Date>("Task 1." + relation,
+//						Date.class, new TimeRange(today.getTime(), dayAfter2.getTime()), 0.4);
+//
+//				subgroup.addChild(child1);
+//
+//				model.getGanttEntryRelationModel().addEntryRelation(new DefaultGanttEntryRelation<DefaultGanttEntry<Date>>(child1, child2, relation));
+//			} 
+///*			else {
+//				model.getGanttEntryRelationModel().addEntryRelation(new DefaultGanttEntryRelation<DefaultGanttEntry<Date>>(child1, child2, relation));
+//			} */
+//		}
+//
+//		if (_debug) {
+//			group1.addChild(subgroup);
+//		}
+		model.addGanttEntry(group1);
+		model.addGanttEntry(group2);
+		model.addGanttEntry(group3);
+		model.addGanttEntry(group4);
+		model.addGanttEntry(group5);
 
 		return model;
-	}
-
-	private static Task getTaskById(Long id) {
-		System.out.println("user id " + id);
-		if(id == null) {
-			return null;
-		}
-		return em.find(Task.class, id);
 	}
 
 	public static class CustomGanttEntryRenderer extends DefaultGanttEntryRenderer {
